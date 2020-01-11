@@ -8,7 +8,7 @@ services:
     networks:
       - frontend
     deploy:
-      replicas: 2
+      replicas: 1
       update_config:
         parallelism: 2
         delay: 10s
@@ -24,7 +24,7 @@ services:
       placement:
         constraints: [node.role == manager]
   vote:
-    image: dockersamples/examplevotingapp_vote:before
+    image: bretfisher/examplevotingapp_vote
     ports:
       - 5000:80
     networks:
@@ -38,7 +38,7 @@ services:
       restart_policy:
         condition: on-failure
   result:
-    image: dockersamples/examplevotingapp_result:before
+    image: bretfisher/examplevotingapp_result
     ports:
       - 5001:80
     networks:
@@ -54,10 +54,13 @@ services:
         condition: on-failure
 
   worker:
-    image: dockersamples/examplevotingapp_worker
+    image: bretfisher/examplevotingapp_worker:java
     networks:
       - frontend
       - backend
+    depends_on:
+      - db
+      - redis
     deploy:
       mode: replicated
       replicas: 1
@@ -71,7 +74,7 @@ services:
         constraints: [node.role == manager]
 
   visualizer:
-    image: dockersamples/visualizer:stable
+    image: dockersamples/visualizer
     ports:
       - "8080:8080"
     stop_grace_period: 1m30s
